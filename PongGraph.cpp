@@ -17,7 +17,7 @@ const int gameWidth = 800;
 const int gameHeight = 600;
 const float gW = 800.f;
 const float gH = 600.f;
-float MAXBOUNCE = 0.0001f;
+float MAXBOUNCE = 0.01f;
 Vector leftSpeed(0.f, 400.f);
 Vector rightSpeed(0.f, 400.f);
 Vector ballSpeed1(250.f, 100.f);
@@ -96,7 +96,7 @@ int main()
     sf::Text leftScore;
     leftScore.setFont(font);
     leftScore.setCharacterSize(20);
-    leftScore.setPosition(gW/4.f, gH/4.f);
+    leftScore.setPosition(gW/4.f, gH - 50);
     leftScore.setColor(sf::Color::White);
     int score1 = 0;
     ss1 << score1;
@@ -107,7 +107,7 @@ int main()
     sf::Text rightScore;
     rightScore.setFont(font);
     rightScore.setCharacterSize(20);
-    rightScore.setPosition(gW - gW/4.f, gH/4.f);
+    rightScore.setPosition(gW - gW/4.f, gH - 50);
     rightScore.setColor(sf::Color::White);
     int score2 = 0;
     ss2 << score2;
@@ -344,32 +344,15 @@ int main()
               float dist = std::sqrt(ball1ball2distx + ball1ball2disty);
               if (dist <= 2.f * ballRad)
                {
-                    if(xc == true)
-                    {
-                        if(yc == true)
-                        {
-                            ball.setPosition(ball.getPosition().x - 5.f, ball.getPosition().y - 5.f);
-                            ball2.setPosition(ball2.getPosition().x + 5.f, ball.getPosition().y + 5.f);
-                        }
-                        else
-                        {
-                            ball.setPosition(ball.getPosition().x - 5.f, ball.getPosition().y + 5.f);
-                            ball2.setPosition(ball2.getPosition().x + 5.f, ball.getPosition().y - 5.f);
-                        }
-                    }
-                    else
-                    {
-                        if(yc == true)
-                        {
-                            ball.setPosition(ball.getPosition().x + 5.f, ball.getPosition().y - 5.f);
-                            ball2.setPosition(ball2.getPosition().x + 5.f, ball.getPosition().y + 5.f);
-                        }
-                        else
-                        {
-                            ball.setPosition(ball.getPosition().x + 5.f, ball.getPosition().y + 5.f);
-                            ball2.setPosition(ball2.getPosition().x + 5.f, ball.getPosition().y - 5.f);
-                        }
-                    }
+                   float overlap = 2*ballRad - dist;
+                    Vector disp(ball.getPosition().x - ball2.getPosition().x, ball.getPosition().y - ball2.getPosition().y);
+                    Vector norm = comp.vectorNormalize(disp);
+                    Vector ball2push = comp.scalarMult(norm, overlap/2);
+                    Vector ball1push = comp.scalarMult(ball2push, -1);
+
+                    ball.setPosition(ball.getPosition().x + ball2push.x, ball.getPosition().y + ball2push.y);
+                    ball2.setPosition(ball2.getPosition().x + ball1push.x, ball2.getPosition().y + ball1push.y);
+
                     Vector axisCollision(ball1ball2distx, ball1ball2disty);
                     vPar1 = comp.vectorProjection(ballSpeed1, axisCollision);
                     vPar2 = comp.vectorProjection(ballSpeed2, axisCollision);
